@@ -8,6 +8,67 @@ ESP32-S3 project for:
 - sending timeout alerts through an HTTP webhook,
 - keeping the firmware resilient with watchdog supervision.
 
+## Prerequisites
+
+This repository is the project source tree, not a standalone prebuilt package.
+
+You can clone it and use it directly, but you still need a working `ESP-IDF` environment to configure, build, flash, and monitor the firmware.
+
+## Environment Requirements
+
+Recommended host environment:
+
+- Windows 10 or Windows 11 with PowerShell
+- or Linux / WSL with a normal ESP-IDF shell environment
+
+Required software:
+
+- `ESP-IDF 6.0`
+- Python managed by ESP-IDF
+- Xtensa toolchain for `esp32s3`
+- CMake and Ninja installed through ESP-IDF tools
+- Git
+
+Required hardware:
+
+- an `ESP32-S3` board
+- USB data cable
+- access to the board serial port such as `COM3`
+
+Project assumptions:
+
+- target chip is `esp32s3`
+- flash size is configured for `16MB`
+- OTA layout assumes a `16MB` flash chip
+
+Recommended before first build:
+
+- verify `idf.py --version` reports `ESP-IDF v6.0`
+- verify the board can be detected on a serial port
+- verify the ESP-IDF export / environment activation script works in your shell
+
+Practical meaning:
+
+- this repo already contains the application source code
+- the vendored `esp_wireguard` component is already included in the repo
+- you do not need to create a new ESP-IDF project from scratch
+- you do need to install `ESP-IDF 6.0` and its toolchain on your machine
+
+Minimum setup:
+
+- `ESP-IDF 6.0`
+- Python environment created by ESP-IDF
+- Xtensa toolchain for `esp32s3`
+- USB serial driver / access to the board's COM port
+
+If you are on Windows, the simplest path is:
+
+1. install Espressif's official ESP-IDF tools and `ESP-IDF 6.0`
+2. open an ESP-IDF PowerShell or use this repo's helper script
+3. build from this repository directory
+
+Without ESP-IDF installed, this repository alone is not enough to compile firmware.
+
 ## Build
 
 ```powershell
@@ -18,6 +79,16 @@ idf.py build
 ```
 
 If `export.ps1` cannot find Python on your machine, use the helper script above instead of calling the ESP-IDF export script directly.
+
+First-time bring-up on a new machine usually looks like:
+
+```powershell
+git clone https://github.com/WWWa222/esp32_control_servo.git
+cd esp32_control_servo
+. .\tools\enter_idf_env.ps1
+idf.py set-target esp32s3
+idf.py build
+```
 
 ## Configure
 
@@ -89,6 +160,7 @@ Endpoints:
 - `GET /api/help`
 - `GET /api/status`
 - `GET /api/wifi`
+- `GET /api/ota`
 - `GET /api/wireguard`
 - `GET /api/servo/config`
 - `GET /api/report`
@@ -98,6 +170,7 @@ Endpoints:
 - `POST /api/press?mode=short`
 - `POST /api/press?mode=long`
 - `POST /api/press?ms=350`
+- `POST /api/ota?url=https://example.com/firmware.bin`
 - `POST /api/report?source=debian-node&payload=JSON_STRING`
 - `POST /api/heartbeat?host=NB01&user=alice&cpu=22.4&mem=51.8&uptime=86400`
 - `POST /api/alert/test`
@@ -179,6 +252,47 @@ Clear the stored runtime Wi-Fi credentials:
 Invoke-WebRequest `
   -Method Post `
   -Uri "http://192.168.1.50/api/wifi/clear" `
+  -Headers @{ "X-Auth-Token" = "YOUR_TOKEN" }
+```
+
+## OTA Notes
+
+The project now includes a basic HTTPS OTA flow for `16MB` ESP32-S3 boards.
+
+Current implementation:
+
+- custom partition table with `factory`, `ota_0`, and `ota_1`
+- OTA trigger endpoint: `POST /api/ota?url=https://.../firmware.bin`
+- OTA status endpoint: `GET /api/ota`
+- boot-time confirmation of a newly booted OTA image
+- rollback support enabled in the bootloader
+
+Current practical status:
+
+- local build and partition layout have been verified
+- the OTA control API has been verified on-device
+- a full OTA download still depends on the ESP32 being able to reach the target HTTPS host
+
+Important constraints:
+
+- the OTA URL must be `https://`
+- the firmware file must be reachable by the ESP32 itself, not just by your PC
+- the image must fit inside the OTA app partition
+
+Example trigger:
+
+```powershell
+Invoke-WebRequest `
+  -Method Post `
+  -Uri "http://192.168.1.50/api/ota?url=https://your-host/remote_power_controller.bin" `
+  -Headers @{ "X-Auth-Token" = "YOUR_TOKEN" }
+```
+
+Example status check:
+
+```powershell
+Invoke-WebRequest `
+  -Uri "http://192.168.1.50/api/ota" `
   -Headers @{ "X-Auth-Token" = "YOUR_TOKEN" }
 ```
 
