@@ -1,0 +1,24 @@
+idf_component_register(
+    SRCS
+        "app_main.c"
+        "alert_service.c"
+        "console_task.c"
+        "http_api.c"
+        "ota_service.c"
+        "servo_control.c"
+        "status_store.c"
+        "wifi_service.c"
+    INCLUDE_DIRS
+        "include"
+    PRIV_REQUIRES
+        app_update
+        esp_driver_mcpwm
+        esp_event
+        esp_https_ota
+        esp_http_server
+        esp_netif
+        esp_timer
+        esp_wifi
+        mbedtls
+        nvs_flash
+)

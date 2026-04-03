@@ -1,0 +1,148 @@
+menu "Remote Power Controller"
+
+config RPC_DEVICE_NAME
+    string "Device name"
+    default "esp32-power-controller"
+
+config RPC_WIFI_SSID
+    string "Wi-Fi SSID"
+    default ""
+
+config RPC_WIFI_PASSWORD
+    string "Wi-Fi password"
+    default ""
+
+config RPC_WIFI_FALLBACK_AP_ENABLE
+    bool "Enable fallback setup hotspot"
+    default y
+
+config RPC_WIFI_FALLBACK_AP_SSID
+    string "Fallback setup hotspot SSID"
+    default "esp32-power-controller-setup"
+    depends on RPC_WIFI_FALLBACK_AP_ENABLE
+
+config RPC_WIFI_FALLBACK_AP_PASSWORD
+    string "Fallback setup hotspot password"
+    default "esp32setup"
+    depends on RPC_WIFI_FALLBACK_AP_ENABLE
+
+config RPC_WIFI_FALLBACK_AP_CHANNEL
+    int "Fallback setup hotspot channel"
+    range 1 13
+    default 1
+    depends on RPC_WIFI_FALLBACK_AP_ENABLE
+
+config RPC_WIFI_USE_STATIC_IP
+    bool "Use static IPv4 for station Wi-Fi"
+    default n
+
+config RPC_WIFI_STATIC_IP
+    string "Static IPv4 address"
+    default "192.168.1.50"
+    depends on RPC_WIFI_USE_STATIC_IP
+
+config RPC_WIFI_STATIC_NETMASK
+    string "Static IPv4 netmask"
+    default "255.255.255.0"
+    depends on RPC_WIFI_USE_STATIC_IP
+
+config RPC_WIFI_STATIC_GATEWAY
+    string "Static IPv4 gateway"
+    default "192.168.1.1"
+    depends on RPC_WIFI_USE_STATIC_IP
+
+config RPC_WIFI_STATIC_DNS1
+    string "Static DNS server 1"
+    default "8.8.8.8"
+    depends on RPC_WIFI_USE_STATIC_IP
+
+config RPC_WIFI_STATIC_DNS2
+    string "Static DNS server 2"
+    default "1.1.1.1"
+    depends on RPC_WIFI_USE_STATIC_IP
+
+config RPC_API_AUTH_TOKEN
+    string "API auth token"
+    default ""
+
+config RPC_SERVO_GPIO
+    int "Servo signal GPIO"
+    range 0 48
+    default 14
+
+config RPC_SERVO_MIN_PULSE_US
+    int "Servo minimum pulse width (us)"
+    range 300 1000
+    default 500
+
+config RPC_SERVO_MAX_PULSE_US
+    int "Servo maximum pulse width (us)"
+    range 1500 3000
+    default 2500
+
+config RPC_SERVO_MIN_ANGLE
+    int "Servo minimum angle"
+    range -90 0
+    default 0
+
+config RPC_SERVO_MAX_ANGLE
+    int "Servo maximum angle"
+    range 90 180
+    default 180
+
+config RPC_SERVO_REST_ANGLE
+    int "Servo rest angle"
+    range -90 180
+    default 0
+
+config RPC_SERVO_PRESS_ANGLE
+    int "Legacy default press angle"
+    range -90 180
+    default 65
+
+config RPC_SERVO_READY_ANGLE
+    int "Servo ready angle"
+    range -90 180
+    default RPC_SERVO_REST_ANGLE
+
+config RPC_SERVO_SHORT_PRESS_ANGLE
+    int "Servo short press angle"
+    range -90 180
+    default RPC_SERVO_PRESS_ANGLE
+
+config RPC_SERVO_LONG_PRESS_ANGLE
+    int "Servo long press angle"
+    range -90 180
+    default RPC_SERVO_PRESS_ANGLE
+
+config RPC_SHORT_PRESS_MS
+    int "Short press duration (ms)"
+    range 50 2000
+    default 250
+
+config RPC_LONG_PRESS_MS
+    int "Long press duration (ms)"
+    range 1000 10000
+    default 6000
+
+config RPC_SERVO_PREPARE_SETTLE_MS
+    int "Servo prepare settle delay (ms)"
+    range 0 3000
+    default 150
+
+config RPC_SERVO_RELEASE_SETTLE_MS
+    int "Servo release settle delay (ms)"
+    range 0 3000
+    default 150
+
+config RPC_HOST_HEARTBEAT_TIMEOUT_SEC
+    int "Host heartbeat timeout (s)"
+    range 5 600
+    default 45
+
+config RPC_STATUS_LOG_INTERVAL_SEC
+    int "Status log interval (s)"
+    range 5 300
+    default 30
+
+endmenu
